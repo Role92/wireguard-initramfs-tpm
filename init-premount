@@ -30,7 +30,7 @@ log_begin_msg 'Loading wireguard config'
 
 tpm2_unseal -c "${HANDLE}" -p "pcr:sha256:${PCRS}" > /etc/wireguard/private_key
 
-if [ ! -e /etc/wireguard/private_key ]; then
+if [ ! -s /etc/wireguard/private_key ]; then
   log_failure_msg 'Wireguard client private keyfile not found, skipping start'
   exit 0
 fi
