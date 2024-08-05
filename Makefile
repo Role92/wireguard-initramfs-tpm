@@ -1,6 +1,7 @@
 # Makefile for wireguard initramfs boot.
 
 TARGETDIR = $(DESTDIR)/etc/wireguard-initramfs
+TPMDIR    = ./tpm
 INITRAMFS = $(DESTDIR)/etc/initramfs-tools
 DOCSDIR   = $(DESTDIR)/usr/local/share/docs/wireguard-initramfs
 
@@ -51,6 +52,17 @@ install: root_check remove_legacy install_deps
 	@echo "  update-initramfs -u && update-grub"
 	@echo
 	@echo "Done."
+
+.PHONY seal_privkey
+seal_privkey: root_check install
+	mkdir -p "$(TPMDIR)"
+	tpm2_createprimary -c "$(TPMDIR)/primary.ctx"
+	tpm2_startauthsession -S "$(TPMDIR)/session.ctx"
+	tpm2_policypcr -Q -S "$(TPMDIR)/session.ctx" -l sha256:0,1,2,3,5,6,7 -L "$(TPMDIR)/policy.pol"
+	tpm2_flushcontext "$(TPMDIR)/session.ctx"
+	tpm2_create -C "$(TPMDIR)/primary.ctx" -u "$(TPMDIR)/key.pub" -r "$(TPMDIR)/key.priv"
+	tpm2_create -Q --hash-algorithm=sha256 --public="$(TPMDIR)/key.pub" --private="$(TPMDIR)/key.priv" --sealing-input="$(TARGETDIR)/private_key" --parent-context="$(TPMDIR)/primary.ctx" --policy="$(TPMDIR)/policy.pol" -c "$(TPMDIR)/seal.ctx"
+	tpm2_evictcontrol -c "$(TPMDIR)/seal.ctx" > "$(TPMDIR)/handle.txt"
 
 .PHONY: uninstall
 uninstall: root_check remove_legacy
