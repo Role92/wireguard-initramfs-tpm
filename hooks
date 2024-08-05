@@ -26,11 +26,6 @@ fi
 # shellcheck source=/etc/wireguard-initramfs/config
 . "${CONFIG}"
 
-if [ ! -s "${CLIENT_PRIVATE_KEYFILE}" ]; then
-  echo "Wireguard client private key required. Missing: ${CLIENT_PRIVATE_KEYFILE}"
-  return 1
-fi
-
 if [ -n "${PRE_SHARED_KEY}" ] && [ ! -s "${PRE_SHARED_KEY}" ]; then
   echo "Wireguard client pre shared key required. Missing: ${PRE_SHARED_KEY}"
   return 1
@@ -47,7 +42,6 @@ done
 # Copy config and host keys
 mkdir -p -- "${DESTDIR}/etc/wireguard"
 cp -p "${CONFIG}" "${DESTDIR}/etc/wireguard"
-cp -p "${CLIENT_PRIVATE_KEYFILE}" "${DESTDIR}/etc/wireguard/private_key"
 if [ -n "${PRE_SHARED_KEY}" ]; then
   cp -p "${PRE_SHARED_KEY}" "${DESTDIR}/etc/wireguard/pre_shared_key"
 fi
