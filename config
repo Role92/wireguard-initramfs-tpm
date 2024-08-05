@@ -35,6 +35,10 @@ PEER_ENDPOINT=wg.example.com:"${PEER_PORT}"
 # Client Private key. Specify location of file containing only the private key.
 CLIENT_PRIVATE_KEYFILE=/etc/wireguard-initramfs/private_key
 
+# Comma-separated list of platform configuration registers, the private key
+# should be sealed against.
+PCRS="0,1,2,3,5,6,7"
+
 # Persistent Keepalive. Required to ensure connection for non-exposed ports.
 PERSISTENT_KEEPALIVES=25
 
