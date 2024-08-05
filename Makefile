@@ -69,7 +69,7 @@ seal: root_check
 	@tpm2_flushcontext "$(TPMDIR)/session.ctx"
 	@tpm2_create -C "$(TPMDIR)/primary.ctx" -u "$(TPMDIR)/key.pub" -r "$(TPMDIR)/key.priv"
 	@tpm2_create -Q --hash-algorithm=sha256 --public="$(TPMDIR)/key.pub" --private="$(TPMDIR)/key.priv" --sealing-input="$(TARGETDIR)/private_key" --parent-context="$(TPMDIR)/primary.ctx" --policy="$(TPMDIR)/policy.pol" -c "$(TPMDIR)/seal.ctx"
-	@tpm2_evictcontrol -c "$(TPMDIR)/seal.ctx" > "$(TPMDIR)/handle.txt"
+	@tpm2_evictcontrol -c "$(TPMDIR)/seal.ctx" | grep -Eo '0x[0-9]{8}' > "$(TPMDIR)/handle.txt"
 	@grep -q 'HANDLE' config || echo "HANDLE=\"$$(cat $(TPMDIR)/handle.txt)\"" >> config
 
 .PHONY: uninstall
